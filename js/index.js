@@ -1,5 +1,6 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
 // modded by raxy on 21jan18, beautified by http://jsbeautifier.org/
+// uses iota.js v0.4.6
 
 $(document).ready(function() {
    /*    
