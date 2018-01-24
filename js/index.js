@@ -1,32 +1,9 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
-// modded by raxy on 21jan18, beautified by http://jsbeautifier.org/
+// modded by raxy on 24jan18, beautified by http://jsbeautifier.org/
 // uses iota.js v0.4.6
 
 $(document).ready(function() {
-   /*    
-       var iota = new IOTA({ //ERR_CONNECTION_REFUSED!
-           'host': 'http://iota.pro-servers.de',
-           'port': 14700
-       });
-       var iota = new IOTA({ // error 500!
-           'host': 'http://cryptoiota.win',
-           'port': 14265
-       }); 
-       var iota = new IOTA({
-           'host': 'http://eugene.iota.community', // ERR_CONNECTION_TIMED_OUT !
-           'port': 14265
-       });
-       var iota = new IOTA({
-           'host': 'http://IOTAserver.raganius.com', // ERR_CONNECTION_TIMED_OUT !
-           'port': 14600
-       });
-       var iota = new IOTA({
-           'host': 'http://potato.iotasalad.org', // 403 (Forbidden) !
-           'port': 14265
-       });
-   */
    var iota;
-
    var seed;
    var address;
    var checkedTxs = 0;
@@ -108,11 +85,13 @@ $(document).ready(function() {
    //
    $("#seedSubmit").on("click", function() {
       // We modify the entered seed to fit the criteria of 81 chars, all uppercase and only latin letters
-      setSeed($("#userSeed").val());     
+      setSeed($("#userSeed").val());
+      var httpsChecked = document.querySelector("#cb-https").checked;  
       iota = new IOTA({
-         'host': 'http://'+$("#walletSrvHost").val(),
-         'port': $("#walletSrvPort").val()
+         "host": (httpsChecked ? "https://" : "http://") +$("#walletSrvHost").val(),
+         "port": $("#walletSrvPort").val()
       });
+      //alert("URL "+iota.host);
       // Then we remove the input
       $("#enterSeed").html('<div class="alert alert-success" role="alert">Tks for your connection params. You can generate an address now.</div>');
       // We fetch the latest transactions every 90 seconds
