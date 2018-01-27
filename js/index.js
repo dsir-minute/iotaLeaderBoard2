@@ -1,9 +1,43 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
-// modded by raxy on 24jan18, beautified by http://jsbeautifier.org/
+// modded by raxy on 27jan18, beautified by http://jsbeautifier.org/
 // uses iota.js v0.4.6
 
+function formattedNow( unixMillis){
+   var date = new Date( unixMillis);
+   var year = date.getFullYear(); //full year in yyyy format
+   var month = (date.getMonth() < 9 ? '0' : '') + (date.getMonth() + 1); //adding leading 0 if month less than 10 for mm format. Used less than 9 because javascriptmonths are 0 based.
+   var day = (date.getDate() < 10 ? '0' : '') + date.getDate(); //adding leading 0 if date less than 10 for the required dd format
+   var hours = (date.getHours() < 10 ? '0' : '') + date.getHours(); 
+   var minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes(); //adding 0 if minute less than 10 for the required mm format
+   var sec = (date.getSeconds() < 10 ? '0' : '') + date.getSeconds();
+   return day + '/' + month + '/' + year + '@' + hours + ':' + minutes + ':'+ sec ;
+}
+
 $(document).ready(function() {
+   /*    
+       var iota = new IOTA({ //ERR_CONNECTION_REFUSED!
+           'host': 'http://iota.pro-servers.de',
+           'port': 14700
+       });
+       var iota = new IOTA({ // error 500!
+           'host': 'http://cryptoiota.win',
+           'port': 14265
+       }); 
+       var iota = new IOTA({
+           'host': 'http://eugene.iota.community', // ERR_CONNECTION_TIMED_OUT !
+           'port': 14265
+       });
+       var iota = new IOTA({
+           'host': 'http://IOTAserver.raganius.com', // ERR_CONNECTION_TIMED_OUT !
+           'port': 14600
+       });
+       var iota = new IOTA({
+           'host': 'http://potato.iotasalad.org', // 403 (Forbidden) !
+           'port': 14265
+       });
+   */
    var iota;
+
    var seed;
    var address;
    var checkedTxs = 0;
@@ -50,20 +84,31 @@ $(document).ready(function() {
          if (accountData.transfers.length > checkedTxs) {
             console.log("RECEIVED NEW TXS");
             accountData.transfers.forEach(function(transfer) {
-               try {
-                  var message = iota.utils.extractJson(transfer);
+               var message = iota.utils.extractJson(transfer);
+               if( message){
                   console.log("Extracted JSON from Transaction: ", message);
                   message = JSON.parse(message);
                   console.log("JSON: ", message);
                   var newTx = {
                      'name': message.name,
                      'message': message.message,
-                     'value': transfer[0].value
+                     'value': transfer[0].value,
+                     'persistence': transfer[0].persistence,
+                     'hash': transfer[0].hash,
+                     'tstamp': transfer[0].attachmentTimestamp
                   }
-                  transferList.push(newTx);
-               } catch (e) {
-                  console.log("Transaction did not contain any JSON Data");
+               } else {
+                  console.log("Transaction did not contain message");
+                  var newTx = {
+                     'name': 'none',
+                     'message': 'none',
+                     'value': 'none',
+                     'persistence': transfer[0].persistence,
+                     'hash': transfer[0].hash,
+                     'tstamp': transfer[0].attachmentTimestamp
+                  }
                }
+               transferList.push(newTx);
             })
             // Increase the counter of checkedTxs
             checkedTxs = accountData.transfers.length;
@@ -73,6 +118,49 @@ $(document).ready(function() {
             updateLeaderboardHTML(transferList);
          }
       })
+   }
+   //
+   //  Updates the leaderboard list HTML
+   //
+   function updateLeaderboardHTML(rankedList) {
+
+       // Now we actually sort the rankedList
+       rankedList.sort(function (a, b) {
+           if (a.value > b.value) {
+               return -1;
+           }
+           if (a.value < b.value) {
+               return 1;
+           }
+           // a must be equal to b
+           return 0;
+       });
+
+       var html = '';
+       var htmlConfirms = '';
+       /*
+       var hashArr = [ rankedList[0].hash];
+       // 
+       iota.api.getLatestInclusion( hashArr, (statesArr)=> {
+         alert("hashArr:"+JSON.stringify(hashArr)+";inclusionStateArr:"+JSON.stringify(statesArr));    
+       });
+*/
+       for (var i = 0; i < rankedList.length; i++) {
+
+           var message = JSON.stringify(rankedList[i].message);
+           var name = rankedList[i].name;
+           var value = rankedList[i].value
+           var rank = i + 1;
+
+           var listElement = '<tr><td class="iota__rank">' + rank + '<br/>'+formattedNow( rankedList[i].tstamp)+'</td><td class="iota__name">' + name + '</td><td class="iota__message">' + message + '</td><td class="iota__value">' + value + '</td></tr>'
+           html += listElement;
+           htmlConfirms += '<tr><td>'+ rank +'</td>';
+           htmlConfirms += '<td>'+ rankedList[i].hash +'</td>';
+           htmlConfirms += '<td>'+ rankedList[i].persistence +'</td></tr>';
+       }
+
+       $("#leaderboard").html(html);
+       $("#confirms").html(htmlConfirms);
    }
    //
    // Menu Open/Close
@@ -85,18 +173,18 @@ $(document).ready(function() {
    //
    $("#seedSubmit").on("click", function() {
       // We modify the entered seed to fit the criteria of 81 chars, all uppercase and only latin letters
-      setSeed($("#userSeed").val());
-      var httpsChecked = document.querySelector("#cb-https").checked;  
+      setSeed($("#userSeed").val());     
       iota = new IOTA({
-         "host": (httpsChecked ? "https://" : "http://") +$("#walletSrvHost").val(),
-         "port": $("#walletSrvPort").val()
+         'host': 'http://'+$("#walletSrvHost").val(),
+         'port': $("#walletSrvPort").val()
       });
-      //alert("URL "+iota.host);
       // Then we remove the input
-      $("#enterSeed").html('<div class="alert alert-success" role="alert">Tks for your connection params. You can generate an address now.</div>');
-      // We fetch the latest transactions every 90 seconds
+      //$("#enterSeed").html('<div class="alert alert-success" role="alert">Tks for your connection params. You can generate an address now.</div>');
+      $(this).hide();
+      // We fetch the latest transactions now & every 90 seconds
       getAccountInfo(); 
       setInterval(getAccountInfo, 90000);
+      alert("Tks for your connection params. You can generate an address now.");
    });
    //
    // Generate a new address
