@@ -1,5 +1,5 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
-// modded by raxy on 27jan18, beautified by http://jsbeautifier.org/
+// modded by raxy, last upd on 27jan18, beautified by http://jsbeautifier.org/
 // uses iota.js v0.4.6
 
 function formattedNow( unixMillis){
