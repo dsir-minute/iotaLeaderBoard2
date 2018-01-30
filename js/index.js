@@ -1,5 +1,5 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
-// modded by raxy, last upd on 27jan18, beautified by http://jsbeautifier.org/
+// modded by raxy, last upd on 30jan18, beautified by http://jsbeautifier.org/
 // uses iota.js v0.4.6
 
 function formattedNow( unixMillis){
@@ -86,12 +86,12 @@ $(document).ready(function() {
             accountData.transfers.forEach(function(transfer) {
                var message = iota.utils.extractJson(transfer);
                if( message){
-                  console.log("Extracted JSON from Transaction: ", message);
-                  message = JSON.parse(message);
+                  console.log("Extracted msg from Transaction: ", message);
+                  //var jsonMessage = JSON.parse(message);
                   console.log("JSON: ", message);
                   var newTx = {
-                     'name': message.name,
-                     'message': message.message,
+                     'name': 'none',
+                     'message': message,
                      'value': transfer[0].value,
                      'persistence': transfer[0].persistence,
                      'hash': transfer[0].hash,
