@@ -1,5 +1,5 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
-// modded by raxy, last upd on 30jan18, beautified by http://jsbeautifier.org/
+// modded by raxy, last upd on 01feb18, beautified by http://jsbeautifier.org/
 // uses iota.js v0.4.6
 
 function formattedNow( unixMillis){
@@ -40,7 +40,7 @@ $(document).ready(function() {
 
    var seed;
    var address;
-   var checkedTxs = 0;
+   //var checkedTxs = 0;
 
    function toggleSidebar() {
       $(".button").toggleClass("active");
@@ -81,24 +81,25 @@ $(document).ready(function() {
          var transferList = [];
          //  Go through all transfers to determine if the tx contains a message
          //  Only valid JSON data is accepted
-         if (accountData.transfers.length > checkedTxs) {
-            console.log("RECEIVED NEW TXS");
+         //  if (accountData.transfers.length > checkedTxs) {
+         if ( accountData.transfers.length > 0) { // always refresh display in case some persistence changed
+            console.log("RECEIVED TXS");
             accountData.transfers.forEach(function(transfer) {
                var message = iota.utils.extractJson(transfer);
                if( message){
-                  console.log("Extracted msg from Transaction: ", message);
+                  console.log("Extracted msg from transfer: ", message);
                   //var jsonMessage = JSON.parse(message);
-                  console.log("JSON: ", message);
+                  //console.log("JSON: ", message);
                   var newTx = {
                      'name': 'none',
                      'message': message,
                      'value': transfer[0].value,
-                     'persistence': transfer[0].persistence,
+                     'persistence': transfer[0].persistence, // TODO : clone processing of history.js in raxycli-app repo to handle 'bundle-confirmed' & co
                      'hash': transfer[0].hash,
                      'tstamp': transfer[0].attachmentTimestamp
                   }
                } else {
-                  console.log("Transaction did not contain message");
+                  console.log("transfer did not contain message");
                   var newTx = {
                      'name': 'none',
                      'message': 'none',
@@ -110,12 +111,9 @@ $(document).ready(function() {
                }
                transferList.push(newTx);
             })
-            // Increase the counter of checkedTxs
-            checkedTxs = accountData.transfers.length;
-         }
-         // If we received messages, update the leaderboard
-         if (transferList.length > 0) {
             updateLeaderboardHTML(transferList);
+            // Increase the counter of checkedTxs
+            //checkedTxs = accountData.transfers.length;
          }
       })
    }
@@ -152,7 +150,7 @@ $(document).ready(function() {
            var value = rankedList[i].value
            var rank = i + 1;
 
-           var listElement = '<tr><td class="iota__rank">' + rank + '<br/>'+formattedNow( rankedList[i].tstamp)+'</td><td class="iota__name">' + name + '</td><td class="iota__message">' + message + '</td><td class="iota__value">' + value + '</td></tr>'
+           var listElement = '<tr><td>' + rank + '</td><td>'+formattedNow( rankedList[i].tstamp)+'</td><td>' + message + '</td><td>' + value + '</td></tr>'
            html += listElement;
            htmlConfirms += '<tr><td>'+ rank +'</td>';
            htmlConfirms += '<td>'+ rankedList[i].hash +'</td>';

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- 
    I am index.html for electron-quick-start
-   augmented by raxy, last upd 27jan18
+   augmented by raxy, last upd 01feb18
 -->
 <html>
    <head>
@@ -12,7 +12,7 @@
       <!--link href="https://fonts.googleapis.com/css?family=Galada|Ubuntu:400,500,700" rel="stylesheet"-->
       <link href="css/bootstrap.min.css" rel="stylesheet">
       <link href="css/style.css" rel="stylesheet">
-      <script type="text/javascript" src="js/iota-0.4.6.js"></script>
+      <script type="text/javascript" src="js/iota-0.4.7.js"></script>
       <!--script type="text/javascript" src="js/helpers/updateLeaderboardHTML.js"></script-->
       <script type="text/javascript" src="js/helpers/updateAddressHTML.js"></script>
       <!--script>
@@ -48,18 +48,18 @@
             <table class="table-fill">
                <thead>
                   <tr>
-                     <th class="rank__title">rank / when</th>
-                     <th class="address__title">from</th>
-                     <th class="amount__title">Message</th>
-                     <th class="full__title">amount</th>
+                     <th>rank</th>
+                     <th>when</th>
+                     <th>message</th>
+                     <th>amount</th>
                   </tr>
                </thead>
                <tbody id="leaderboard">
                   <tr>
-                     <td class="iota__rank"></td>
-                     <td class="iota__name"></td>
-                     <td class="iota__message">No transfer displayed for now: In the side panel on the right, submit your connection params, generate an address and then have someone send a transaction+message to it.</td>
-                     <td class="iota__value"></td>
+                     <td></td>
+                     <td></td>
+                     <td>No transfer displayed for now: In the side panel on the right, submit your connection params, generate an address and then have someone send a transaction+message to it.</td>
+                     <td></td>
                   </tr>
                </tbody>
             </table>                        
@@ -67,8 +67,8 @@
             <table class="table-fill">
                <thead>
                   <tr>
-                     <th>Rank</th>
-                     <th>tran-hash</th>
+                     <th>rank</th>
+                     <th>transf-hash</th>
                      <th>confirmed</th>
                   </tr>
                </thead>
