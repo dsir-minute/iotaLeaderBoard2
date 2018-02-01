@@ -1,6 +1,6 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
 // modded by raxy, last upd on 01feb18, beautified by http://jsbeautifier.org/
-// uses iota.js v0.4.6
+// uses iota.js v0.4.7
 
 function formattedNow( unixMillis){
    var date = new Date( unixMillis);
@@ -63,6 +63,42 @@ $(document).ready(function() {
       }
    }
    //
+   // display transfers à la raxycli-app, to be debugged
+   //
+   function showItems( number, accountData) { 
+      const transfers = accountData.transfers.slice(0);
+      const categorizedTransfers = iota.utils.categorizeTransfers(transfers, accountData.addresses);
+
+      const biggestValue = transfers.reduce(
+         (biggest, bundle) => biggest > bundle[0].value ? biggest : bundle[0].value,
+         0
+      ) + '';
+      const persistences = transfers.reduce(
+         (persists, bundle) => {
+           if (bundle[0].persistence && persists.indexOf(bundle[0].bundle) === -1) {
+             persists.push(bundle[0].bundle);
+           }
+           return persists;
+         }, []);
+      transfers.forEach((bundle, index) => {
+         const shortAddress = bundle[0].address;
+         const persisted = bundle[0].persistence;
+         let reattachConfirmed = false;
+         if (!persisted && persistences.indexOf(bundle[0].bundle) !== -1) {
+           reattachConfirmed = true;
+         }
+         const shortHash = bundle[0].hash;
+         const time = bundle[0].timestamp;
+         const value = bundle[0].value;
+
+         const thisCategorizeTransfer = categorizedTransfers.sent.filter(t => t[0].hash === bundle[0].hash);
+         const type = bundle.length === 1 && bundle[0].value === 0 ? 'address' : thisCategorizeTransfer.length > 0 ? 'spending from' : 'receiving to';
+         console.log( "hash="+shortHash+","+type+"="+shortAddress+",value="+value);
+         console.log( "status="+(persisted ? " confirmed " : reattachConfirmed ? " bundle confirmed " : " pending ")+",time="+time);
+      });
+   };
+  
+   //
    //  Gets the addresses and transactions of an account
    //  As well as the current balance
    //  Automatically updates the HTML on the site
@@ -95,7 +131,7 @@ $(document).ready(function() {
                      'message': message,
                      'value': transfer[0].value,
                      'persistence': transfer[0].persistence, // TODO : clone processing of history.js in raxycli-app repo to handle 'bundle-confirmed' & co
-                     'hash': transfer[0].hash,
+                     'hash': transfer[0].hash+"/"+transfer[0].bundle,
                      'tstamp': transfer[0].attachmentTimestamp
                   }
                } else {
@@ -105,7 +141,7 @@ $(document).ready(function() {
                      'message': 'none',
                      'value': 'none',
                      'persistence': transfer[0].persistence,
-                     'hash': transfer[0].hash,
+                     'hash': transfer[0].hash+"/"+transfer[0].bundle,
                      'tstamp': transfer[0].attachmentTimestamp
                   }
                }
@@ -114,6 +150,7 @@ $(document).ready(function() {
             updateLeaderboardHTML(transferList);
             // Increase the counter of checkedTxs
             //checkedTxs = accountData.transfers.length;
+            showItems( 10, accountData);
          }
       })
    }
@@ -181,7 +218,7 @@ $(document).ready(function() {
       $(this).hide();
       // We fetch the latest transactions now & every 90 seconds
       getAccountInfo(); 
-      setInterval(getAccountInfo, 90000);
+      //setInterval(getAccountInfo, 90000);
       alert("Tks for your connection params. You can generate an address now.");
    });
    //
