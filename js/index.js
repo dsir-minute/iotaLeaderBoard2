@@ -1,6 +1,10 @@
 // I am  leaderboard-example/js/index.js from https://github.com/domschiener/leaderboard-example.git
-// modded by raxy, last upd on 02feb18, beautified by http://jsbeautifier.org/
-// uses iota.js v0.4.7
+// modded by raxy, beautified by http://jsbeautifier.org/
+// 02feb uses iota.js v0.4.7
+// 11feb html link on message if is image url+md5, remove quotes around displayed messages, rm getAccountInfoOld()
+//       if msg should contain an img url, use this pattern : {"goourl":"BHrywm","md5":"5FB1B6EA53E8EED384505717FB0FF982"} w/ newCli or raxy-cliapp2 github repos
+
+const IMGLINK = '<a href="http://goo.gl/#IMG" target="_blank">imgMd5:#MD5</a>';
 
 function formattedNow( unixMillis){
    var date = new Date( unixMillis);
@@ -63,7 +67,7 @@ $(document).ready(function() {
       }
    }
    //
-   // display transfers à la raxycli-app, to be debugged
+   // display transfers à la raxycli-app
    //
    function showItems( accountData) { 
       var transferList = [];
@@ -134,57 +138,6 @@ $(document).ready(function() {
    //  As well as the current balance
    //  Automatically updates the HTML on the site
    //
-   function getAccountInfoOld() {
-      // Command to be sent to the IOTA Node
-      // Gets the latest transfers for the specified seed
-      console.log("in getAccountInfoOld() for seed "+seed);
-      iota.api.getAccountData(seed, function(e, accountData) {
-         console.log("Account data", accountData);
-         // Update address in case it's not defined yet
-         if (!address && accountData.addresses[0]) {
-            address = iota.utils.addChecksum(accountData.addresses[accountData.addresses.length - 1]);
-            updateAddressHTML(address);
-         }
-         var transferList = [];
-         //  Go through all transfers to determine if the tx contains a message
-         //  Only valid JSON data is accepted
-         //  if (accountData.transfers.length > checkedTxs) {
-         if ( accountData.transfers.length > 0) { // always refresh display in case some persistence changed
-            console.log("RECEIVED TXS");
-            accountData.transfers.forEach(function(transfer) {
-               var message = iota.utils.extractJson(transfer);
-               if( message){
-                  console.log("Extracted msg from transfer: ", message);
-                  //var jsonMessage = JSON.parse(message);
-                  //console.log("JSON: ", message);
-                  var newTx = {
-                     'name': 'none',
-                     'message': message,
-                     'value': transfer[0].value,
-                     'persistence': null,
-                     'hash': transfer[0].hash+"<br/>"+transfer[0].bundle,
-                     'tstamp': transfer[0].attachmentTimestamp
-                  }
-               } else {
-                  console.log("transfer did not contain message");
-                  var newTx = {
-                     'name': 'none',
-                     'message': 'none',
-                     'value': 'none',
-                     'persistence': null,
-                     'hash': transfer[0].hash+"<br/>"+transfer[0].bundle,
-                     'tstamp': transfer[0].attachmentTimestamp
-                  }
-               }
-               transferList.push(newTx);
-            })
-            updateLeaderboardHTML(transferList);
-            // Increase the counter of checkedTxs
-            //checkedTxs = accountData.transfers.length;
-//            showItems( accountData);
-         }
-      })
-   }
    function getAccountInfoNew() {
       // Command to be sent to the IOTA Node
       // Gets the latest transfers for the specified seed
@@ -225,15 +178,25 @@ $(document).ready(function() {
        });
 */
        for (var i = 0; i < rankedList.length; i++) {
-
-           var message = JSON.stringify(rankedList[i].message);
+           var msgJson;
+           try {
+               msgJson = JSON.parse( rankedList[i].message);
+           } catch (err) {
+               console.log("error in JSON.parse()");
+               msgJson = {};
+           }
 //           var name = rankedList[i].name;
            var value = rankedList[i].value
            var rank = i + 1;
            var status = rankedList[i].persistence;
 
-           var listElement = '<tr><td>' + rank + '</td><td>'+formattedNow( rankedList[i].tstamp)+'</td><td>' + message + '</td><td>' + value + '</td>';
-           listElement += '<td>' + status + '</td></tr>';
+           var listElement = '<tr><td>' + rank + '</td><td>'+formattedNow( rankedList[i].tstamp)+'</td><td>';
+           if ( msgJson.hasOwnProperty("goourl")) {
+              listElement += IMGLINK.replace("#IMG", msgJson.goourl).replace("#MD5", msgJson.md5) + '</td><td>';
+           } else {
+              listElement += rankedList[i].message + '</td><td>';
+           }
+           listElement += value + '</td><td>' + status + '</td></tr>';
            html += listElement;
            htmlConfirms += '<tr><td>'+ rank +'</td>';
            htmlConfirms += '<td>'+ rankedList[i].hash +'</td></tr>';
@@ -263,7 +226,7 @@ $(document).ready(function() {
       $(this).hide();
       // We fetch the latest transactions now & every 90 seconds
       getAccountInfoNew(); 
-      setInterval(getAccountInfoNew, 90000);
+//      setInterval(getAccountInfoNew, 90000);
       alert("Tks for your connection params. You can generate an address now.");
    });
    //
