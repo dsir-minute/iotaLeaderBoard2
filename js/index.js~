@@ -226,7 +226,7 @@ $(document).ready(function() {
       $(this).hide();
       // We fetch the latest transactions now & every 90 seconds
       getAccountInfoNew(); 
-      setInterval(getAccountInfoNew, 50000);
+      setInterval(getAccountInfoNew, 90000);
       alert("Tks for your connection params. You can generate an address now.");
    });
    //

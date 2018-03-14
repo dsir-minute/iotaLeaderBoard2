@@ -33,7 +33,7 @@
    <body>
       <main>
          <header class="header">
-            <p class="header__title">Ivan's <span><img class="header__logo" src="images/logo.png" /></span> messageboard</p>
+            <p class="header__title">Raxy's <span><img class="header__logo" src="images/logo.png" /></span> Leaderboard</p>
             <nav>
                <div class="nav-right hidden-xs">
                   <div class="button" id="btn">
